@@ -29,13 +29,14 @@ app.get('/todos/:id', function(req, res){
 });
 
 app.post('/todos', function(req, res){
-  var todo = req.body;
+  var todo = _.pick(req.body, 'description', 'completed');
 
   if (!_.isBoolean(todo.completed) || !_.isString(todo.description) || todo.description.trim().length === 0){
     return res.status(400).send();
   }
-  todo.id = todoNextId++;
 
+  todo.description = todo.description.trim();
+  todo.id = todoNextId++;
   todos.push(todo);
   res.json(todo);
 });
