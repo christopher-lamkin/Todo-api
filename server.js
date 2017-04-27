@@ -41,7 +41,6 @@ app.post('/todos', function(req, res){
   res.json(todo);
 });
 
-// DELETE /todos/:id
 app.delete('/todos/:id', function(req, res){
   var todoID = parseInt(req.params.id, 10);
   var matchedTodo = _.findWhere(todos, {id: todoID});
