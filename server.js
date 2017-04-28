@@ -17,12 +17,21 @@ app.get('/todos', function(req, res){
   var queryParams = req.query;
   var filteredTodos = todos;
 
-if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true' ){
-  filteredTodos = _.where(todos, {completed: true});
-} else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false'){
-  filteredTodos = _.where(todos, {completed: false});
-} 
-  res.json(filteredTodos);
+  if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true' ){
+    filteredTodos = _.where(todos, {completed: true});
+  } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false'){
+    filteredTodos = _.where(todos, {completed: false});
+  }
+
+  var searchTerm = queryParams["q"];
+
+  if (searchTerm){
+    var searchResults = _.filter(filteredTodos, function(todo){return todo.description.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1});
+  } else {
+    var searchResults = filteredTodos;
+  }
+
+  res.json(searchResults);
 });
 
 app.get('/todos/:id', function(req, res){
