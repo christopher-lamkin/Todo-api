@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore');
+var db = require('./db.js');
 
 var app = express();
 var PORT = process.env.PORT || 3000;
@@ -46,28 +47,38 @@ app.get('/todos/:id', function(req, res){
 });
 
 app.post('/todos', function(req, res){
-  var todo = _.pick(req.body, 'description', 'completed');
+  var body = _.pick(req.body, 'description', 'completed');
 
-  if (!_.isBoolean(todo.completed) || !_.isString(todo.description) || todo.description.trim().length === 0){
-    return res.status(400).send();
-  }
+  // call create on db.todo
+  db.todo.create(body).then(function(todo){
+      res.status(200).send(todo.toJSON());
+  }, function(e){
+    res.status(400).json(e);
+  });
+  // if successful respond to API caller with 200 and todo.toJSON()
 
-  todo.description = todo.description.trim();
-  todo.id = todoNextId++;
-  todos.push(todo);
-  res.json(todo);
-});
+  // if it fails pass it the error object e res.status(400).json(e)
 
-app.delete('/todos/:id', function(req, res){
-  var todoID = parseInt(req.params.id, 10);
-  var matchedTodo = _.findWhere(todos, {id: todoID});
-
-  if (!matchedTodo){
-    res.status(404).json({"error": "no todo found with that ID."});
-  } else {
-    todos = _.without(todos, matchedTodo);
-    res.json(matchedTodo);
-  }
+//   if (!_.isBoolean(todo.completed) || !_.isString(todo.description) || todo.description.trim().length === 0){
+//     return res.status(400).send();
+//   }
+//
+//   todo.description = todo.description.trim();
+//   todo.id = todoNextId++;
+//   todos.push(todo);
+//   res.json(todo);
+// });
+//
+// app.delete('/todos/:id', function(req, res){
+//   var todoID = parseInt(req.params.id, 10);
+//   var matchedTodo = _.findWhere(todos, {id: todoID});
+//
+//   if (!matchedTodo){
+//     res.status(404).json({"error": "no todo found with that ID."});
+//   } else {
+//     todos = _.without(todos, matchedTodo);
+//     res.json(matchedTodo);
+//   }
 });
 
 app.put('/todos/:id', function(req, res){
@@ -96,6 +107,8 @@ app.put('/todos/:id', function(req, res){
   res.json(matchedTodo);
 });
 
-app.listen(PORT, function(){
-  console.log('Express listening on port ' + PORT + '.');
+db.sequelize.sync().then(function(){
+  app.listen(PORT, function(){
+    console.log('Express listening on port ' + PORT + '.');
+  });
 });
