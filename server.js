@@ -60,6 +60,20 @@ app.post('/todos', function(req, res){
   });
 });
 
+app.delete('/todos/:id', function(req, res){
+  var todoID = parseInt(req.params.id, 10);
+  db.todo.findById(todoID).then(function(todo){
+    if (!!todo){
+      todo.destroy({force: true});
+      res.json(todo);
+    } else {
+      res.status(404).send();
+    }
+  }, function(e){
+    res.status(500).send();
+  });
+});
+
 app.put('/todos/:id', function(req, res){
   var todoID = parseInt(req.params.id, 10);
   var matchedTodo = _.findWhere(todos, {id: todoID});
