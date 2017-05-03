@@ -3,6 +3,7 @@ module.exports = function(sequelize, DataTypes){
     email: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
       validate: {
         isEmail: true
       }
@@ -12,6 +13,14 @@ module.exports = function(sequelize, DataTypes){
       allowNull: false,
       validate: {
         len: [1, 15]
+      }
+    }
+  }, {
+    hooks: {
+      beforeValidate: function(user, options){
+        if (user.email && typeof user.email === 'string'){
+          user.email = user.email.toLowerCase();
+        }
       }
     }
   });
